@@ -1,0 +1,22 @@
+# Persönliche Dateien – gehören nicht ins Repository
+einstellungen.json
+funk_einstellungen.json
+aussprache.json
+strecken_daten.json
+renningenieur_log.txt
+PitVoice-Fehlerbericht.txt
+rennen/
+stimmen/
+webseite-dateien/
+__pycache__/
+*.pyc
+
+# Gebaute Dateien
+*.exe
+setup/payload.zip
+setup/bau-protokoll.txt
+
+# Inno Setup: Programmkopie und Ergebnis
+setup/programm/
+setup/PitVoice-AI-Setup.exe
+setup-protokoll.txt

@@ -1,0 +1,65 @@
+LIZENZEN UND HINWEISE / LICENCES AND NOTICES
+============================================
+
+PitVoice AI ist freie Software unter der GNU General Public License Version 3 (siehe LIZENZ.txt).
+Der Quellcode liegt direkt im Programmordner (die .py-Dateien). / PitVoice AI is free software under
+the GNU GPL version 3 (see LIZENZ.txt). The source code is in the program folder.
+
+Dieses Programm ist kostenlos und wird ohne jede Gewähr bereitgestellt. Die Nutzung erfolgt auf
+eigene Verantwortung. / This program is free and provided without any warranty. Use at your own risk.
+
+Kein offizielles Produkt von Kunos Simulazioni oder 505 Games. "Assetto Corsa Competizione" und
+"Assetto Corsa" sind Marken der jeweiligen Inhaber und werden nur genannt, um zu beschreiben, mit
+welchem Spiel das Programm zusammenarbeitet. Fahrzeugmarken, die der Ingenieur nennt, gehören ihren
+jeweiligen Inhabern. / Not an official product of Kunos Simulazioni or 505 Games. All trademarks
+belong to their respective owners and are only named to describe compatibility.
+
+
+DATENSCHUTZ / PRIVACY
+---------------------
+Das Programm selbst sammelt keine Daten und hat keinen eigenen Server. Je nach Einstellung gehen
+Daten direkt von deinem PC an diese Dienste, mit deinem eigenen Konto bzw. Schlüssel:
+- KI online (Groq, groq.com, USA; oder Google Gemini): deine Frage und die Renndaten dazu.
+- Spracherkennung online (Groq): die Aufnahme deiner Frage.
+- Neural-Stimmen (Microsoft Edge Vorlese-Dienst, inoffiziell): der Text, der vorgelesen wird.
+Es gelten die Datenschutzbestimmungen dieser Anbieter. Wer nichts übertragen möchte, stellt KI und
+Spracherkennung auf "Auf diesem PC" und nutzt eine Piper-Stimme.
+The program itself collects no data and has no server. Depending on your settings, data goes from
+your PC directly to the services above, using your own account/key.
+
+
+VERWENDETE SOFTWARE / THIRD-PARTY SOFTWARE
+------------------------------------------
+Wird bei der Installation aus dem Internet geladen (nicht Teil dieses Programms):
+- Python (Python Software Foundation License)
+- NumPy (BSD-3-Clause)
+- sounddevice (MIT), PortAudio (MIT)
+- faster-whisper (MIT), CTranslate2 (MIT), Whisper-Modelle von OpenAI (MIT)
+- pywin32 (PSF License)
+- customtkinter (MIT)
+- pywebview (BSD-3-Clause)
+- edge-tts (GPL-3.0), optional, nur für die Neural-Stimmen
+- piper-tts (GPL-3.0)
+- Ollama (MIT), optional; KI-Modelle unterliegen den Bedingungen ihrer Anbieter (z. B. Gemma Terms of Use)
+- llama.cpp (MIT) und Qwen3-TTS (Apache-2.0), optional
+- Pocket TTS von Kyutai (Modell: CC BY 4.0), optional
+
+
+STIMMEN / VOICES (Piper, werden bei Bedarf geladen)
+---------------------------------------------------
+- Thorsten (de_DE-thorsten): Thorsten Müller, Thorsten-Voice, CC0
+- Kerstin (de_DE-kerstin): CC0
+- Karlsson, Ramona, Eva (de_DE-karlsson, de_DE-ramona, de_DE-eva_k): M-AILABS Speech Dataset
+- Northern English Male (en_GB-northern_english_male): OpenSLR SLR83, CC BY-SA 4.0
+- Pocket TTS: Kyutai, CC BY 4.0
+Piper-Stimmen: github.com/rhasspy/piper / huggingface.co/rhasspy/piper-voices
+
+Eigene Stimme für Qwen3: Bitte nur die eigene Stimme verwenden oder die einer Person, die
+ausdrücklich zugestimmt hat. / Only use your own voice or that of a person who explicitly agreed.
+
+UPDATE-PRÜFUNG / UPDATE CHECK
+-----------------------------
+Beim Start fragt das Programm auf der Webseite des Herausgebers nach, ob es eine neue Version gibt.
+Dabei wird nur die Versionsnummer abgerufen; es werden keine Daten von dir gesendet (die Webseite
+sieht technisch bedingt deine IP-Adresse). / On start, the program asks the publisher's website
+whether a new version exists. Only the version number is fetched; no data about you is sent.

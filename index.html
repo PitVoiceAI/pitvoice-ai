@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>PitVoice AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="stil.css">
+</head>
+<body>
+<div class="licht licht-1" aria-hidden="true"></div>
+<div class="licht licht-2" aria-hidden="true"></div>
+<div class="licht licht-3" aria-hidden="true"></div>
+
+<div class="rahmen">
+  <!-- Seitenleiste -->
+  <nav class="leiste glas" aria-label="Seiten">
+    <div class="marke">
+      <svg class="marke-zeichen" viewBox="0 0 36 36" aria-hidden="true"><defs><clipPath id="logo-kreis"><circle cx="18" cy="18" r="14"/></clipPath></defs><circle cx="18" cy="18" r="18" fill="#FFC83D"/><g clip-path="url(#logo-kreis)"><rect x="4" y="4" width="28" height="28" fill="#F0F0F0"/><path fill="#14161B" d="M4 4h7v7H4zM18 4h7v7h-7zM11 11h7v7h-7zM25 11h7v7h-7zM4 18h7v7H4zM18 18h7v7h-7zM11 25h7v7h-7zM25 25h7v7h-7z"/></g></svg>
+      <div>
+        <div class="marke-name">PitVoice AI</div>
+        <div class="marke-unter">KI-Renningenieur</div>
+      </div>
+    </div>
+    <button class="nav-knopf aktiv" data-ziel="cockpit">Cockpit</button>
+    <button class="nav-knopf" data-ziel="live">Live-Karte</button>
+    <button class="nav-knopf" data-ziel="funk">Funk</button>
+    <button class="nav-knopf" data-ziel="auswertung">Auswertung</button>
+    <button class="nav-knopf" data-ziel="fortschritt">Fortschritt</button>
+    <button class="nav-knopf" data-ziel="ansagen">Ansagen</button>
+    <button class="nav-knopf" data-ziel="einstellungen">Einstellungen</button>
+    <button class="nav-knopf" data-ziel="befehle">Befehle</button>
+    <button class="nav-knopf unterstuetzen" id="unterstuetzen-nav" hidden>♥ Unterstützen</button>
+    <div class="leiste-platz"></div>
+    <div class="funk-anzeige" id="funk-anzeige" aria-live="polite"></div>
+    <div class="zustand"><span class="punkt" id="punkt"></span><span id="zustand-text">Gestoppt</span></div>
+    <button class="start-knopf" id="start-knopf">Starten</button>
+  </nav>
+
+  <main class="inhalt">
+
+    <!-- Cockpit -->
+    <section class="seite" data-seite="cockpit">
+      <div class="kopf"><div><h1>Cockpit</h1><div class="unter" id="cockpit-unter">Starte den Ingenieur unten links.</div></div></div>
+      <div class="cockpit-raster">
+        <div class="pitboard glas">
+          <div class="pb-platz"><span class="gross" id="pb-platz">–</span><span class="gesamt" id="pb-gesamt"></span></div>
+          <div class="trenner"></div>
+          <div class="pb-abstaende">
+            <span class="wert" id="pb-vorne-wert"></span><span class="name" id="pb-vorne-name"></span>
+            <span class="wert" id="pb-hinten-wert"></span><span class="name" id="pb-hinten-name"></span>
+          </div>
+          <div class="trenner"></div>
+          <div class="pb-fuss">
+            <span id="pb-runde" style="font-weight:600"></span>
+            <span class="leise" id="pb-letzte"></span>
+            <span class="lila" id="pb-beste"></span>
+          </div>
+          <div class="sehr-leise" id="pb-strecke" style="font-size:13px"></div>
+        </div>
+        <div class="kurzfunk glas">
+          <h2 style="margin:0 0 4px;font-size:16px;font-weight:600">Letzter Funk</h2>
+          <div id="kurzfunk" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+      </div>
+      <div class="strategie glas">
+        <div><span class="titel">Tank</span><span class="wert" id="st-tank">–</span><span class="leise" id="st-tank-d" style="font-size:12px"></span><div class="balken" id="st-balken"><div style="width:0%"></div></div></div>
+        <div><span class="titel">Boxenstopp</span><span class="wert" id="st-box">–</span><span class="leise" id="st-box-d" style="font-size:12px"></span></div>
+        <div><span class="titel">Restzeit</span><span class="wert" id="st-rest">–</span><span class="leise" id="st-rest-d" style="font-size:12px"></span></div>
+      </div>
+    </section>
+
+    <!-- Live-Karte -->
+    <section class="seite versteckt" data-seite="live">
+      <div class="kopf">
+        <div><h1>Live-Karte</h1><div class="unter" id="live-unter">Klick auf einen Fahrer in der Liste oder auf der Karte, um seine Runden und Sektoren zu sehen.</div></div>
+        <div class="kopf-aktionen"><button class="knopf" id="karte-spiegeln">Karte spiegeln</button></div>
+      </div>
+      <div class="live-raster">
+        <div class="karte glas">
+          <svg id="karte" role="img" aria-label="Streckenkarte mit allen Autos"></svg>
+          <div class="leer" id="karte-leer">Die Karte zeichnet sich von selbst, sobald Autos auf der Strecke fahren.</div>
+          <div class="legende">
+            <span class="pille glas-hell"><span class="gelb">●</span> Du</span>
+            <span class="pille glas-hell"><span class="lila">●</span> Im Fokus</span>
+            <span class="pille glas-hell"><span class="sehr-leise">●</span> In der Box</span>
+          </div>
+        </div>
+        <div class="rangliste glas">
+          <div style="display:flex;justify-content:space-between;padding:0 12px 10px"><h2 style="margin:0;font-size:16px;font-weight:600">Rangliste</h2><span class="leise" style="font-size:12px">Abstand zu dir</span></div>
+          <div class="liste" id="rangliste"></div>
+        </div>
+        <div class="fokus-tafel glas">
+          <div class="fokus-kopf" id="fokus-kopf"></div>
+          <div class="tabelle-box" id="fokus-tabelle"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Funk -->
+    <section class="seite versteckt" data-seite="funk">
+      <div class="kopf"><div><h1>Funk</h1><div class="unter">Alles, was du gesagt hast und was dein Ingenieur gefunkt hat</div></div></div>
+      <div class="glas" style="flex-grow:1;min-height:0;display:flex;flex-direction:column">
+        <div class="funk-verlauf" id="funk-verlauf" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Auswertung -->
+    <section class="seite versteckt" data-seite="auswertung">
+      <div class="kopf">
+        <div><h1>Auswertung</h1><div class="unter" id="auswertung-unter">Deine Runden der aktuellen oder einer gespeicherten Session</div></div>
+        <div class="kopf-aktionen">
+          <label class="versteckt" for="session-auswahl">Session</label>
+          <select class="auswahl" id="session-auswahl"></select>
+          <button class="knopf" id="ordner-oeffnen">Ordner öffnen</button>
+        </div>
+      </div>
+      <div class="rollen">
+      <div class="kacheln">
+        <div class="kachel glas"><div class="titel">Bestzeit</div><div class="wert lila" id="k-bestzeit">–</div></div>
+        <div class="kachel glas"><div class="titel">Runden</div><div class="wert" id="k-runden">–</div></div>
+        <div class="kachel glas"><div class="titel">Konstanz</div><div class="wert" id="k-konstanz">–</div></div>
+        <div class="kachel glas"><div class="titel">Trend pro Runde</div><div class="wert" id="k-trend">–</div></div>
+        <div class="kachel glas"><div class="titel">Start → Ziel</div><div class="wert" id="k-platz">–</div></div>
+        <div class="kachel glas"><div class="titel">Stopps / Strafen</div><div class="wert" id="k-stopps">–</div></div>
+      </div>
+      <div class="diagramm glas"><svg id="diagramm" role="img" aria-label="Diagramm der Rundenzeiten"></svg></div>
+      <div class="glas tafel telemetrie">
+        <div class="tele-kopf">
+          <h2>Telemetrie</h2>
+          <div class="reihe">
+            <div class="segment" id="tele-modus" role="group" aria-label="Ansicht"></div>
+            <label class="leise" for="tele-runde">Runde</label><select class="auswahl klein" id="tele-runde"></select>
+            <label class="leise tele-gegen" for="tele-vergleich">gegen</label><select class="auswahl klein tele-gegen" id="tele-vergleich"></select>
+          </div>
+        </div>
+        <div class="tele-legende" id="tele-legende"></div>
+        <div class="tele-wrap"><svg id="tele-svg" role="img" aria-label="Tempo, Gas, Bremse und Zeitunterschied über die Runde"></svg><div class="tele-tipp" id="tele-tipp" hidden></div></div>
+        <div class="tele-auswertung" id="tele-auswertung"></div>
+        <div class="kurven-liste" id="tele-kurven"></div>
+      </div>
+      <div class="auswertung-tabelle glas"><div class="tabelle-box" id="auswertung-tabelle"></div></div>
+      </div>
+    </section>
+
+    <!-- Fortschritt -->
+    <section class="seite versteckt" data-seite="fortschritt">
+      <div class="kopf"><div><h1>Fortschritt</h1><div class="unter">Deine Bestzeiten pro Strecke und Auto über alle Sessions</div></div></div>
+      <div class="rollen">
+        <div class="glas tafel" id="fortschritt-detail">
+          <div class="tele-kopf"><h2 id="fortschritt-titel">Wähle unten eine Strecke</h2><span class="leise" id="fortschritt-info"></span></div>
+          <svg id="fortschritt-svg" role="img" aria-label="Bestzeiten über die Zeit" style="width:100%;height:260px"></svg>
+        </div>
+        <div class="fortschritt-raster" id="fortschritt-liste"></div>
+      </div>
+    </section>
+
+    <!-- Ansagen -->
+    <section class="seite versteckt" data-seite="ansagen">
+      <div class="kopf"><div><h1>Ansagen</h1><div class="unter">Worüber sich dein Ingenieur von selbst meldet</div></div></div>
+      <div class="rollen">
+        <div class="glas einstellung">
+          <div><div class="name">Wie gesprächig?</div><div class="hinweis">Ruhig: fast nur Wichtiges. Normal: ab und zu ein Rundenbericht. Viel: fast jede Runde etwas.</div></div>
+          <div class="segment" id="gespraechig" role="group" aria-label="Wie gesprächig"></div>
+        </div>
+        <div class="glas ansagen-raster" id="ansagen-schalter"></div>
+        <div class="leise" style="padding:0 8px;font-size:13px">Während der Fahrt per Funk: „Funkstille“ lässt nur noch Dringendes durch (Flaggen, Pitlimiter, Box). „Ansagen wieder an“ schaltet alles wieder ein.</div>
+      </div>
+    </section>
+
+    <!-- Einstellungen -->
+    <section class="seite versteckt" data-seite="einstellungen">
+      <div class="kopf"><div><h1>Einstellungen</h1><div class="unter" id="einstellung-hinweis">Wird automatisch gespeichert</div></div></div>
+      <div class="rollen">
+        <div class="abschnitt-titel">Sprache · Language</div>
+        <div class="glas">
+          <div class="einstellung"><div><div class="name">Sprache · Language</div><div class="hinweis">Oberfläche, Spracherkennung, Ansagen und KI. Gilt nach einem Neustart des Programms.</div></div><div class="reihe"><div class="segment" id="sprache" role="group" aria-label="Sprache"></div><button class="knopf akzent" id="sprache-neustart">Jetzt neu starten</button></div></div>
+        </div>
+        <div class="abschnitt-titel">Aussehen</div>
+        <div class="glas">
+          <div class="einstellung"><div><div class="name">Farbthema</div><div class="hinweis">Die Farben der Lichter hinter dem Glas. Gilt auch für das Overlay und die Handy-Ansicht.</div></div><div class="themen" id="thema-wahl" role="group" aria-label="Farbthema"></div></div>
+        </div>
+        <div class="abschnitt-titel">Stimme und Funk</div>
+        <div class="glas">
+          <div class="einstellung"><div><div class="name">Stimme</div><div class="hinweis">Für schwächere PCs: „Neural (Edge)“ läuft online und kostet keine FPS. Piper und Pocket laufen auf dem Prozessor. Qwen3 belastet die Grafikkarte stark.</div></div>
+            <div><div class="reihe"><label class="versteckt" for="stimme">Stimme</label><select class="auswahl" id="stimme" style="min-width:380px"></select><button class="knopf" id="stimme-laden">Laden</button><button class="knopf akzent" id="stimme-testen">Anhören</button></div><div class="status-text" id="stimme-status"></div>
+              <div class="neural-hinweis" id="neural-hinweis" hidden><p id="neural-text"></p><div class="reihe"><button class="knopf akzent" id="neural-ok">Verstanden, trotzdem nutzen</button><button class="knopf" id="neural-nein">Abbrechen</button></div></div></div></div>
+          <div class="einstellung"><div><div class="name">Aussprache</div><div class="hinweis">Wie Abkürzungen und englische Wörter gesprochen werden</div></div><div class="reihe"><button class="knopf" id="aussprache">Wörterbuch bearbeiten</button></div></div>
+          <div class="einstellung"><div><div class="name">Funk-Effekt</div><div class="hinweis">Klingt wie Boxenfunk im Helm</div></div><div class="segment" id="funk-effekt" role="group" aria-label="Funk-Effekt"></div></div>
+          <div class="einstellung"><div class="name">Sprechtempo</div><div class="regler"><input type="range" id="tempo" min="-5" max="10" step="1" aria-label="Sprechtempo"><span class="zahl" id="tempo-wert" style="font-size:16px"></span></div></div>
+          <div class="einstellung"><div class="name">Lautstärke</div><div class="regler"><input type="range" id="lautstaerke" min="0" max="100" step="1" aria-label="Lautstärke"><span class="zahl" id="lautstaerke-wert" style="font-size:16px"></span></div></div>
+          <div class="einstellung"><div><div class="name">Name des Ingenieurs</div><div class="hinweis">So meldet er sich am Funk</div></div><div class="segment" id="ingenieur-name" role="group" aria-label="Name des Ingenieurs"></div></div>
+          <div class="einstellung"><div><div class="name">Gegner nennen</div><div class="hinweis">Fremdsprachige Namen spricht die Stimme oft schlecht aus. „Auto und Platz“ sagt zum Beispiel „der Ferrari auf Platz 5“.</div></div><div class="segment" id="gegner-ansprache" role="group" aria-label="Gegner nennen"></div></div>
+          <div class="einstellung"><div><div class="name">Dein Name</div><div class="hinweis">So spricht er dich an (leer = ohne Namen)</div></div><div><label class="versteckt" for="fahrer-name">Dein Name</label><input class="textfeld" id="fahrer-name" type="text" maxlength="30"></div></div>
+          <div class="einstellung"><div><div class="name">Begrüßung</div><div class="hinweis">Beim Start meldet er sich mit einem Funk-Check</div></div><label class="schalter"><input type="checkbox" id="begruessung"><span class="bahn"></span></label></div>
+        </div>
+
+        <div class="abschnitt-titel">Steuerung</div>
+        <div class="glas">
+          <div class="einstellung"><div><div class="name">Funktaste</div><div class="hinweis">Taste am Lenkrad, Steuerkreuz oder Tastatur</div></div><div class="reihe"><span id="funktaste" style="min-width:280px"></span><button class="knopf" id="funktaste-lernen">Festlegen</button></div></div>
+          <div class="einstellung"><div class="name">Mikrofon</div><div><label class="versteckt" for="mikrofon">Mikrofon</label><select class="auswahl" id="mikrofon" style="min-width:380px"></select></div></div>
+          <div class="einstellung"><div><div class="name">Spracherkennung</div><div class="hinweis">Größer ist genauer, aber langsamer</div></div><div><label class="versteckt" for="modell">Spracherkennung</label><select class="auswahl" id="modell" style="min-width:380px"></select></div></div>
+          <div class="einstellung"><div><div class="name">Spracherkennung online (Groq)</div><div class="hinweis">Deine Frage wird bei Groq in Text umgewandelt. Entlastet schwache PCs, braucht einen Groq-Schlüssel. Ohne Internet nimmt er automatisch die lokale.</div></div><div class="reihe"><label class="schalter"><input type="checkbox" id="erkennung-online"><span class="bahn"></span></label><span class="status-text" id="erkennung-hinweis" style="font-size:13px"></span></div></div>
+        </div>
+
+        <div class="abschnitt-titel">KI-Verständnis</div>
+        <div class="glas">
+          <div class="einstellung"><div><div class="name">KI benutzen</div><div class="hinweis">Versteht frei gesprochene Sätze, wertet die Daten aus und gibt Rat.</div></div><div class="reihe"><label class="schalter"><input type="checkbox" id="ki-an"><span class="bahn"></span></label><span class="status-text" id="ki-status" style="font-size:13px">Prüfe ...</span></div></div>
+          <div class="einstellung"><div><div class="name">KI läuft</div><div class="hinweis">Online kostet keine FPS und läuft auch auf schwachen PCs (kostenloser Schlüssel, Internet nötig). Auf diesem PC braucht sie Grafikkarte oder Prozessor.</div></div><div class="segment" id="ki-anbieter" role="group" aria-label="KI läuft"></div></div>
+          <div class="einstellung nur-online"><div><div class="name">API-Schlüssel</div><div class="hinweis" id="schluessel-hinweis">Kostenlos, ohne Kreditkarte. Auf „Schlüssel holen“ klicken, anmelden, Schlüssel erstellen und hier einfügen.</div></div><div class="reihe"><label class="versteckt" for="ki-schluessel">API-Schlüssel</label><input class="textfeld" id="ki-schluessel" type="password" autocomplete="off" spellcheck="false" placeholder="Schlüssel einfügen" style="width:260px"><button class="knopf" id="schluessel-holen">Schlüssel holen</button><button class="knopf" id="ki-online-pruefen">Prüfen</button></div></div>
+          <div class="einstellung nur-lokal"><div><div class="name">Modell</div><div class="hinweis">Größer ist klüger, aber langsamer</div></div><div class="reihe"><label class="versteckt" for="ki-modell">KI-Modell</label><select class="auswahl" id="ki-modell" style="min-width:380px"></select><button class="knopf" id="ki-laden">Modell laden</button></div></div>
+          <div class="einstellung nur-lokal"><div><div class="name">KI rechnet auf</div><div class="hinweis">Auf der Grafikkarte antwortet sie schneller, kostet aber kurz FPS in ACC. Auf dem Prozessor bleiben deine FPS stabil, die Antwort dauert dafür etwas länger.</div></div><div class="segment" id="ki-geraet" role="group" aria-label="KI rechnet auf"></div></div>
+          <div class="einstellung nur-lokal"><div><div class="name">Ollama</div><div class="hinweis">Das Programm, das die KI ausführt. Einmal installieren, dann läuft es im Hintergrund.</div></div><div class="reihe"><button class="knopf" id="ollama">Ollama herunterladen</button><button class="knopf" id="ki-pruefen">Erneut prüfen</button></div></div>
+        </div>
+
+        <div class="abschnitt-titel">Strategie</div>
+        <div class="glas">
+          <div class="einstellung"><div><div class="name">Sprit-Reserve</div><div class="hinweis">So viele Runden Sprit sollen im Ziel übrig sein</div></div><div class="segment" id="reserve" role="group" aria-label="Sprit-Reserve"></div></div>
+        </div>
+
+        <div class="abschnitt-titel">Zusatz-Anzeigen</div>
+        <div class="glas">
+          <div class="einstellung"><div><div class="name">Overlay über ACC</div><div class="hinweis">Kleines Fenster mit Platz, Abständen, Sprit und dem letzten Funk, das immer oben liegt. Klappt, wenn ACC im Fenster- oder rahmenlosen Modus läuft. Mit der Maus verschieben.</div></div><label class="schalter"><input type="checkbox" id="overlay"><span class="bahn"></span></label></div>
+          <div class="einstellung"><div><div class="name">Auf dem Handy anzeigen</div><div class="hinweis">Cockpit, Karte und Funk auf Handy oder Tablet im selben WLAN. Beim ersten Einschalten fragt Windows nach der Firewall: „Private Netzwerke“ erlauben.</div></div><div class="reihe"><label class="schalter"><input type="checkbox" id="handy"><span class="bahn"></span></label><span class="status-text gruen" id="handy-adresse" style="font-size:14px;user-select:text"></span></div></div>
+        </div>
+
+        <div class="abschnitt-titel">Programm</div>
+        <div class="glas">
+          <div class="einstellung"><div><div class="name">Desktop</div><div class="hinweis">Starten per Doppelklick</div></div><div class="reihe"><button class="knopf" id="verknuepfung">Verknüpfung auf dem Desktop erstellen</button></div></div>
+          <div class="einstellung" id="unterstuetzen-zeile"><div><div class="name">Projekt unterstützen</div><div class="hinweis">PitVoice AI ist kostenlos und wird in der Freizeit entwickelt. Mit dem Newsletter erfährst du von neuen Spielen und Funktionen, mit einer Spende hilfst du bei der Weiterentwicklung.</div></div><div class="reihe"><button class="knopf" id="newsletter-knopf">Newsletter abonnieren</button><button class="knopf akzent" id="spenden-knopf">☕ Kaffee spendieren</button></div></div>
+          <div class="einstellung"><div><div class="name">Problem melden</div><div class="hinweis">Etwas klappt nicht? Ein Klick erstellt einen Fehlerbericht (ohne deine Schlüssel) und öffnet eine fertige E-Mail an info@pitvoice.com. Die Datei einfach anhängen.</div></div><div class="reihe"><button class="knopf" id="fehler-melden">Fehler melden</button></div></div>
+          <div class="einstellung"><div><div class="name">Über dieses Programm</div><div class="hinweis">Kostenlos, Open Source (GPL-3.0) und ohne Gewähr. Kein offizielles Produkt von Kunos Simulazioni oder 505 Games. „Assetto Corsa Competizione“ ist eine Marke der jeweiligen Inhaber.</div></div><div class="reihe"><span class="leise" id="version-text"></span><button class="knopf" id="webseite-knopf">pitvoice.com</button><button class="knopf" id="lizenzen">Lizenzen und Hinweise</button></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Befehle -->
+    <section class="seite versteckt" data-seite="befehle">
+      <div class="kopf"><div><h1>Befehle</h1><div class="unter">Beispiele. Du musst nicht genau diese Sätze sagen, mit KI versteht er auch ganz normale Sätze.</div></div></div>
+      <div class="rollen"><div class="befehle-raster" id="befehle"></div></div>
+    </section>
+  </main>
+</div>
+
+<div class="update-band glas" id="update-band" hidden><div><b id="update-titel"></b><div class="leise" id="update-text"></div></div><div class="reihe"><button class="knopf akzent" id="update-laden">Zur Download-Seite</button><button class="knopf" id="update-zu">Später</button></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="sprache.js"></script>
+<script src="themen.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

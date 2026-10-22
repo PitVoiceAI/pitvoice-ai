@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>PitVoice AI</title>
+<style>
+  :root { --akzent: #FFC83D; --lila: #C9A2FF; --rot: #FF7A6E; --gruen: #3DDC84; --text: #F2F3F5; --leise: #9EA3AD; --sehr-leise: #7D828C;
+          --zahl: "Bahnschrift SemiCondensed", "Barlow Semi Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+          --leiste: 74px; --rand: 12px; --leiste-abstand: 10px; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #050506; color: var(--text); font-family: -apple-system, "Segoe UI", Roboto, system-ui, sans-serif; }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body { height: 100vh; height: 100dvh; display: flex; flex-direction: column; -webkit-tap-highlight-color: transparent;
+         padding: max(var(--rand), env(safe-area-inset-top)) max(var(--rand), env(safe-area-inset-right)) calc(var(--leiste) + env(safe-area-inset-bottom) + 22px + var(--leiste-abstand)) max(var(--rand), env(safe-area-inset-left)); }
+  .licht { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(90px); }
+  .l1 { left: -10%; top: -15%; width: 80vw; height: 50vh; background: var(--licht-1, #FF8A1F); opacity: var(--licht-1-d, 0.22); transition: background 1s, opacity 1s; }
+  .l2 { right: -20%; bottom: -10%; width: 80vw; height: 50vh; background: var(--licht-2, #B5562A); opacity: var(--licht-2-d, 0.24); transition: background 1s, opacity 1s; }
+  .glas { background: rgba(255,255,255,0.055); backdrop-filter: blur(24px) saturate(170%); -webkit-backdrop-filter: blur(24px) saturate(170%);
+          border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); padding: 16px 18px; min-width: 0; }
+
+  /* Kopfzeile */
+  .kopf { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--leise);
+          padding: 10px 14px; margin: 0 auto 12px; max-width: 1400px; border-radius: 16px; }
+  .kopf .rechts { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  #session { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .punkt { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--sehr-leise); margin-right: 6px; }
+  .punkt.an { background: var(--gruen); box-shadow: 0 0 8px var(--gruen); }
+  .vollbild { all: unset; cursor: pointer; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,0.08); flex: none; }
+  .vollbild svg { width: 16px; height: 16px; }
+
+  /* Inhalt: welche Kästen sichtbar sind und wie sie liegen, hängt von der Ansicht ab */
+  .kopf { flex: none; width: 100%; }
+  main { position: relative; z-index: 1; flex: 1; min-height: 0; width: 100%; display: grid; gap: 10px; max-width: 1400px; margin: 0 auto;
+         grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  main > * { min-height: 0; overflow: hidden; }
+  main > * { display: none; }
+
+  /* Pitboard */
+  .platz { display: flex; align-items: flex-end; gap: 10px; }
+  .platz .p { font-family: var(--zahl); font-size: var(--p-gross, 96px); line-height: 0.82; font-weight: 700; color: var(--akzent); text-shadow: 0 0 30px rgba(255,200,61,0.35); }
+  .platz .g { font-family: var(--zahl); font-size: calc(var(--p-gross, 96px) * 0.28); color: var(--sehr-leise); padding-bottom: 4px; }
+  .abst { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 16px; row-gap: 2px; align-items: center; margin-top: 12px; }
+  .abst .w { font-family: var(--zahl); font-size: var(--a-gross, 40px); font-weight: 700; }
+  .abst .n { color: var(--leise); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fuss { display: flex; gap: 6px 18px; flex-wrap: wrap; margin-top: 10px; font-size: 14px; color: var(--leise); }
+  .fuss b { font-family: var(--zahl); font-size: 17px; color: var(--text); font-weight: 600; }
+
+  /* Strategie */
+  .kacheln { gap: 10px; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); }
+  .kachel { padding: 12px 14px; }
+  .kachel .t { font-size: 11px; color: var(--leise); }
+  .kachel .w { font-family: var(--zahl); font-size: var(--k-gross, 24px); font-weight: 700; margin-top: 2px; overflow-wrap: break-word; }
+  .kachel .w.text { font-size: calc(var(--k-gross, 24px) * 0.68); line-height: 1.15; }
+  #tank, #rest { white-space: nowrap; }
+  .kachel .d { font-size: 11px; color: var(--leise); }
+  .balken { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); margin-top: 8px; overflow: hidden; }
+  .balken i { display: block; height: 100%; width: 0; background: var(--akzent); border-radius: 3px; transition: width .6s; }
+  .balken.knapp i { background: var(--rot); }
+
+  /* Karte */
+  .karte { height: 100%; min-height: 0; padding: 8px; position: relative; }
+  .karte svg { width: 100%; height: 100%; display: block; }
+  .auto { transition: transform .5s linear; }
+
+  /* Rangliste */
+  .rangliste { padding: 10px 8px; overflow: hidden; flex-direction: column; }
+  .rangliste h2, .funk-kasten h2 { margin: 2px 10px 8px; font-size: 14px; font-weight: 600; color: var(--leise); }
+  .liste { overflow-y: auto; min-height: 0; }
+  .zeile { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; font-size: 15px; }
+  .zeile .pl { width: 34px; font-family: var(--zahl); font-weight: 700; font-size: 17px; }
+  .zeile .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .zeile .nr { color: var(--sehr-leise); margin-right: 4px; }
+  .zeile .ab { font-family: var(--zahl); font-size: 16px; color: var(--leise); }
+  .zeile.ich { background: rgba(255,200,61,0.12); border: 1px solid rgba(255,200,61,0.35); color: var(--akzent); font-weight: 600; }
+  .zeile.ich .ab { color: var(--akzent); }
+  .zeile.box { opacity: 0.5; }
+
+  /* Funk */
+  .funk { display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; }
+  .blase { padding: 10px 12px; border-radius: 16px; font-size: var(--f-gross, 14px); line-height: 1.4; max-width: 92%; }
+  .blase.du { align-self: flex-end; background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.16); }
+  .blase.ing { align-self: flex-start; background: rgba(255,200,61,0.10); border: 1px solid rgba(255,200,61,0.3); }
+  .leer { color: var(--leise); text-align: center; padding: 30px 10px; }
+  .gruen { color: var(--gruen); } .rot { color: var(--rot) !important; }
+
+  /* Ansichten-Leiste */
+  nav { position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(10px + env(safe-area-inset-bottom));
+        display: flex; gap: 4px; padding: 6px; border-radius: 20px; width: min(560px, calc(100% - 20px)); }
+  nav button { all: unset; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border-radius: 14px;
+               font-size: 11px; color: var(--leise); text-align: center; }
+  nav button svg { width: 22px; height: 22px; }
+  nav button.an { background: rgba(255,200,61,0.16); color: var(--akzent); }
+
+  /* Schriftgrößen wachsen mit dem Bildschirm (vmin), damit alles ohne Scrollen passt */
+  body { --p-gross: clamp(54px, 11vmin, 120px); --a-gross: clamp(26px, 5.4vmin, 56px); --k-gross: clamp(18px, 3.6vmin, 34px); }
+  .pitboard { flex-direction: column; justify-content: center; }
+  .funk-kasten { flex-direction: column; }
+  .funk-kasten .funk { flex: 1; min-height: 0; overflow: hidden; }
+  .rangliste .liste { flex: 1; }
+
+  /* ---------------- Hochformat (Handy und Tablet) ---------------- */
+  main > * { display: none !important; }
+  body.v-alles main { grid-template-rows: auto minmax(0, 1fr) auto minmax(64px, auto); }
+  body.v-alles .pitboard, body.v-alles .karte, body.v-alles .funk-kasten { display: flex !important; }
+  body.v-alles .karte { display: block !important; }
+  body.v-alles .kacheln { display: grid !important; }
+  body.v-alles .funk-kasten h2 { display: none; }
+  body.v-alles .funk-kasten .blase:not(:last-child) { display: none; }
+  body.v-alles .funk-kasten { padding: 10px 12px; }
+
+  body.v-rennen { --p-gross: clamp(110px, 26vmin, 240px); --a-gross: clamp(44px, 11vmin, 100px); --k-gross: clamp(24px, 6vmin, 46px); }
+  body.v-rennen main { grid-template-rows: minmax(0, 1fr) auto; }
+  body.v-rennen .pitboard { display: flex !important; }
+  body.v-rennen .kacheln { display: grid !important; }
+  body.v-rennen .abst .n { font-size: clamp(15px, 3.6vmin, 24px); }
+  body.v-rennen .fuss { font-size: clamp(14px, 3vmin, 20px); }
+  body.v-rennen .fuss b { font-size: clamp(17px, 3.6vmin, 24px); }
+
+  body.v-karte main { grid-template-rows: minmax(0, 1.6fr) minmax(0, 1fr); }
+  body.v-karte .karte { display: block !important; }
+  body.v-karte .rangliste { display: flex !important; }
+
+  body.v-liste main { grid-template-rows: minmax(0, 1fr); max-width: 760px; }
+  body.v-liste .rangliste { display: flex !important; }
+  body.v-liste .zeile { font-size: 17px; padding: 10px 12px; }
+
+  body.v-funk { --f-gross: clamp(16px, 3.4vmin, 22px); }
+  body.v-funk main { grid-template-rows: minmax(0, 1fr); max-width: 900px; }
+  body.v-funk .funk-kasten { display: flex !important; }
+
+  /* Kleine Handys hochkant: in der Übersicht ohne Funk, damit die Karte Platz hat */
+  @media (orientation: portrait) and (max-height: 700px) {
+    body.v-alles main { grid-template-rows: auto minmax(0, 1fr) auto; }
+    body.v-alles .funk-kasten { display: none !important; }
+  }
+  /* Tablet hochkant: Übersicht mit Platz und Strategie nebeneinander */
+  @media (min-width: 700px) and (orientation: portrait) {
+    body.v-alles main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) minmax(90px, auto);
+                        grid-template-areas: "pit kach" "karte karte" "funk funk"; }
+    body.v-alles .pitboard { grid-area: pit; } body.v-alles .kacheln { grid-area: kach; grid-template-columns: minmax(0, 1fr); }
+    body.v-alles .karte { grid-area: karte; } body.v-alles .funk-kasten { grid-area: funk; }
+    body.v-alles .funk-kasten .blase:nth-last-child(2) { display: block; }
+  }
+
+  /* ---------------- Querformat (Handy und Tablet) ---------------- */
+  @media (orientation: landscape) {
+    body.v-alles main { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-rows: auto auto minmax(0, 1fr);
+                        grid-template-areas: "pit karte" "kach karte" "funk karte"; }
+    body.v-alles .pitboard { grid-area: pit; } body.v-alles .kacheln { grid-area: kach; }
+    body.v-alles .karte { grid-area: karte; } body.v-alles .funk-kasten { grid-area: funk; }
+    body.v-alles .funk-kasten .blase { display: block !important; }
+    body.v-alles .funk-kasten h2 { display: block; }
+    body.v-rennen main { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+    body.v-rennen .kacheln { grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(3, minmax(0, 1fr)); }
+    body.v-rennen .kachel { display: flex; flex-direction: column; justify-content: center; }
+    body.v-karte main { grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr); grid-template-rows: minmax(0, 1fr); }
+  }
+  /* Handy quer: wenig Höhe, deshalb Leiste an die Seite und alles kompakter */
+  @media (orientation: landscape) and (max-height: 540px) {
+    :root { --leiste: 0px; --rand: 8px; }
+    body { padding-left: calc(84px + env(safe-area-inset-left)); padding-bottom: calc(8px + env(safe-area-inset-bottom)); padding-top: max(8px, env(safe-area-inset-top)); }
+    nav { left: calc(6px + env(safe-area-inset-left)); top: 50%; bottom: auto; transform: translateY(-50%); flex-direction: column; width: 70px; }
+    nav button { padding: 5px 2px; }
+    nav button svg { width: 20px; height: 20px; }
+    .kopf { padding: 5px 12px; margin-bottom: 6px; }
+    main { gap: 8px; }
+    .glas { padding: 10px 14px; border-radius: 16px; }
+    .kachel { padding: 8px 12px; }
+    .abst { margin-top: 6px; } .fuss { margin-top: 6px; }
+    body.v-alles { --p-gross: clamp(48px, 14vh, 80px); --a-gross: clamp(22px, 7vh, 34px); --k-gross: clamp(17px, 5vh, 24px); }
+    body.v-alles main { grid-template-rows: minmax(0, 1fr) auto; grid-template-areas: "pit karte" "kach karte"; }
+    body.v-alles .funk-kasten { display: none !important; }
+    body.v-rennen { --p-gross: clamp(80px, 28vh, 170px); --a-gross: clamp(32px, 12vh, 70px); --k-gross: clamp(20px, 7vh, 40px); }
+    body.v-rennen .kacheln .kachel { padding: 6px 12px; }
+    body.v-liste .zeile { padding: 6px 12px; font-size: 15px; }
+  }
+
+  /* Tippen auf den Bildschirm blendet die Leiste aus und wieder ein */
+  body { transition: padding .35s ease; }
+  nav { transition: transform .35s ease, opacity .35s ease; }
+  body.leiste-weg { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  body.leiste-weg nav { transform: translate(-50%, calc(100% + 30px)); opacity: 0; pointer-events: none; }
+  @media (orientation: landscape) and (max-height: 540px) {
+    body.leiste-weg { padding-left: max(8px, env(safe-area-inset-left)); padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+    body.leiste-weg nav { transform: translate(calc(-100% - 20px), -50%); }
+  }
+  /* Tablets: mehr Luft zwischen Leiste und Kästen (nur solange die Leiste zu sehen ist) */
+  @media (min-width: 700px) and (min-height: 541px) { :root { --leiste-abstand: 24px; --rand: 18px; } main { gap: 14px; } }
+</style>
+</head>
+<body class="v-alles">
+<div class="licht l1"></div><div class="licht l2"></div>
+<div class="glas kopf">
+  <span><span class="punkt" id="punkt"></span><span id="status">Verbinde ...</span></span>
+  <span class="rechts"><span id="session"></span>
+    <button class="vollbild" id="vollbild" title="Vollbild" aria-label="Vollbild" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  </span>
+</div>
+<main>
+  <section class="glas pitboard">
+    <div class="platz"><span class="p" id="platz">–</span><span class="g" id="gesamt"></span></div>
+    <div class="abst"><span class="w" id="vw"></span><span class="n" id="vn"></span><span class="w" id="hw"></span><span class="n" id="hn"></span></div>
+    <div class="fuss"><span>Runde <b id="runde">–</b></span><span>Letzte <b id="letzte">–</b></span><span>Beste <b id="beste" style="color:var(--lila)">–</b></span></div>
+  </section>
+  <section class="glas karte"><svg id="karte" aria-label="Streckenkarte"></svg></section>
+  <div class="kacheln">
+    <div class="glas kachel"><div class="t">Tank</div><div class="w" id="tank">–</div><div class="d" id="tank-d"></div><div class="balken" id="balken"><i></i></div></div>
+    <div class="glas kachel"><div class="t">Boxenstopp</div><div class="w text" id="box">–</div><div class="d" id="box-d"></div></div>
+    <div class="glas kachel"><div class="t">Restzeit</div><div class="w" id="rest">–</div><div class="d" id="rest-d"></div></div>
+  </div>
+  <section class="glas rangliste"><h2>Rangliste</h2><div class="liste" id="liste"><div class="leer">Noch keine Autos.</div></div></section>
+  <section class="glas funk-kasten"><h2>Funk</h2><div class="funk" id="funk"><div class="leer">Noch kein Funk.</div></div></section>
+</main>
+<nav class="glas" id="ansichten" aria-label="Ansicht wählen">
+  <button data-v="alles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg><span>Übersicht</span></button>
+  <button data-v="rennen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span>Rennen</span></button>
+  <button data-v="karte"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20c-2.5 0-4-1.6-4-3.6 0-2.4 2-3.4 4-3.4h3c2 0 3-1 3-2.6S12 8 10.5 8C8 8 7 6.5 7 5s1.4-2 3-2h7c2.4 0 4 1.6 4 4v9c0 2.2-1.8 4-4 4z"/></svg><span>Karte</span></button>
+  <button data-v="liste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg><span>Rangliste</span></button>
+  <button data-v="funk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>Funk</span></button>
+</nav>
+<script src="sprache.js"></script>
+<script src="themen.js"></script>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+let SPRACHE = "de";
+const T = (de, en) => (SPRACHE === "en" ? en : de);
+function spracheSetzen(sp) { if (sp && sp !== SPRACHE) { SPRACHE = sp; seiteUebersetzen(); } }
+const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (z) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[z]));
+const komma = (x, n = 1) => (x == null ? "–" : Number(x).toFixed(n).replace(".", T(",", ".")));
+let rahmen = null;
+
+// ---------------------------------------------------------------- Ansichten
+const ANSICHTEN = ["alles", "rennen", "karte", "liste", "funk"];
+let ansicht = "alles";
+try { const g = localStorage.getItem("pitvoice_ansicht"); if (ANSICHTEN.includes(g)) ansicht = g; } catch (e) { }
+function ansichtSetzen(v) {
+  ansicht = v;
+  document.body.className = "v-" + v + (document.body.classList.contains("leiste-weg") ? " leiste-weg" : "");
+  document.querySelectorAll("#ansichten button").forEach((b) => b.classList.toggle("an", b.dataset.v === v));
+  try { localStorage.setItem("pitvoice_ansicht", v); } catch (e) { }
+  rahmen = null;            // Karte passt sich der neuen Größe an
+}
+document.querySelectorAll("#ansichten button").forEach((b) => (b.onclick = () => ansichtSetzen(b.dataset.v)));
+ansichtSetzen(ansicht);
+
+// Tippen auf den Bildschirm blendet die Leiste aus und wieder ein (Tippen auf die Leiste selbst nicht)
+let tippStart = null;
+document.addEventListener("pointerdown", (e) => { tippStart = [e.clientX, e.clientY]; }, { passive: true });
+document.addEventListener("pointerup", (e) => {
+  if (!tippStart || e.target.closest("nav, button")) { tippStart = null; return; }
+  const bewegt = Math.hypot(e.clientX - tippStart[0], e.clientY - tippStart[1]) > 12;   // Wischen zählt nicht
+  tippStart = null;
+  if (bewegt) return;
+  document.body.classList.toggle("leiste-weg");
+  rahmen = null;
+}, { passive: true });
+// Wischen nach links/rechts wechselt die Ansicht
+let wischStart = null;
+document.addEventListener("touchstart", (e) => { if (e.touches.length === 1) wischStart = [e.touches[0].clientX, e.touches[0].clientY]; }, { passive: true });
+document.addEventListener("touchend", (e) => {
+  if (!wischStart) return;
+  const dx = e.changedTouches[0].clientX - wischStart[0], dy = e.changedTouches[0].clientY - wischStart[1];
+  wischStart = null;
+  if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8) {
+    const i = ANSICHTEN.indexOf(ansicht) + (dx < 0 ? 1 : -1);
+    if (i >= 0 && i < ANSICHTEN.length) ansichtSetzen(ANSICHTEN[i]);
+  }
+}, { passive: true });
+
+// Vollbild (geht auf Android und Tablets; iPhones erlauben es Webseiten nicht)
+const wurzel = document.documentElement;
+if (wurzel.requestFullscreen || wurzel.webkitRequestFullscreen) {
+  $("vollbild").hidden = false;
+  $("vollbild").onclick = () => {
+    const drin = document.fullscreenElement || document.webkitFullscreenElement;
+    if (drin) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else (wurzel.requestFullscreen || wurzel.webkitRequestFullscreen).call(wurzel).catch?.(() => { });
+  };
+}
+window.addEventListener("resize", () => { rahmen = null; });
+
+// ---------------------------------------------------------------- Karte
+function karte(feld, spiegeln) {
+  const svg = $("karte");
+  const s = spiegeln ? -1 : 1;
+  const punkte = feld.karte || [];
+  const autos = (feld.autos || []).filter((a) => a.x != null);
+  const alle = punkte.concat(autos.map((a) => [a.x, a.y]));
+  if (alle.length < 2) { svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="#9EA3AD" font-size="13">${T("Karte erscheint, sobald gefahren wird", "The map appears as soon as someone drives")}</text>`; svg.removeAttribute("viewBox"); return; }
+  const xs = alle.map((p) => p[0]), ys = alle.map((p) => p[1] * s);
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+  const r0 = Math.max(maxX - minX, maxY - minY) * 0.06 + 1;
+  const neu = [minX - r0, minY - r0, maxX - minX + 2 * r0, maxY - minY + 2 * r0];
+  if (!rahmen || neu.some((w, i) => Math.abs(w - rahmen[i]) > r0 * 0.5)) rahmen = neu;
+  svg.setAttribute("viewBox", rahmen.join(" "));
+  const r = Math.max(rahmen[2], rahmen[3]) * 0.022;
+  if (!svg.querySelector("#strecke")) svg.innerHTML = `<g id="strecke"></g><g id="autos"></g>`;
+  if (punkte.length > 2) {
+    const d = "M" + punkte.map((p) => `${p[0].toFixed(1)} ${(p[1] * s).toFixed(1)}`).join(" L") + " Z";
+    svg.querySelector("#strecke").innerHTML = `<path d="${d}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="${r * 2}" stroke-linejoin="round"></path><path d="${d}" fill="none" stroke="rgba(255,255,255,0.32)" stroke-width="${r * 0.3}" stroke-linejoin="round"></path>`;
+  }
+  const g = svg.querySelector("#autos");
+  const vorhanden = new Map([...g.children].map((k) => [k.dataset.i, k]));
+  for (const a of [...autos].sort((p, q) => p.ich - q.ich)) {
+    let k = vorhanden.get(String(a.index)); vorhanden.delete(String(a.index));
+    const farbe = a.ich ? "#FFC83D" : a.box ? "rgba(255,255,255,0.3)" : "#F2F3F5";
+    const rr = a.ich ? r * 1.2 : r;
+    if (!k) { k = document.createElementNS("http://www.w3.org/2000/svg", "g"); k.setAttribute("class", "auto"); k.dataset.i = a.index; g.appendChild(k); }
+    k.innerHTML = `<circle r="${rr}" fill="${farbe}" stroke="#050506" stroke-width="${r * 0.15}"></circle><text y="${rr * 0.36}" text-anchor="middle" font-size="${rr}" font-weight="700" fill="#111" font-family="sans-serif">${a.platz}</text>`;
+    k.style.transform = `translate(${a.x}px, ${a.y * s}px)`;
+    g.appendChild(k);
+  }
+  vorhanden.forEach((k) => k.remove());
+}
+
+// ---------------------------------------------------------------- Rangliste
+function rangliste(feld) {
+  const autos = [...(feld.autos || [])].sort((a, b) => (a.platz || 99) - (b.platz || 99));
+  if (!autos.length) { $("liste").innerHTML = `<div class="leer">${T("Noch keine Autos.", "No cars yet.")}</div>`; return; }
+  $("liste").innerHTML = autos.map((a) => `<div class="zeile${a.ich ? " ich" : ""}${a.box ? " box" : ""}">
+      <span class="pl">P${esc(a.platz)}</span>
+      <span class="nm"><span class="nr">#${esc(a.nummer)}</span>${esc(a.fahrer || a.name)}</span>
+      <span class="ab">${a.ich ? T("Du", "You") : a.box ? T("Box", "Pit") : esc(a.abstand || "")}</span></div>`).join("");
+  // Bei langen Feldern: eigene Zeile in den sichtbaren Bereich holen
+  const liste = $("liste"), ich = liste.querySelector(".ich");
+  if (ich && liste.scrollHeight > liste.clientHeight) {
+    const oben = ich.offsetTop - liste.offsetTop, unten = oben + ich.offsetHeight;
+    if (oben < liste.scrollTop || unten > liste.scrollTop + liste.clientHeight) liste.scrollTop = oben - liste.clientHeight / 2;
+  }
+}
+
+// ---------------------------------------------------------------- Daten holen
+async function holen() {
+  try {
+    const antwort = await fetch("/daten", { cache: "no-store" });
+    const d = await antwort.json();
+    const i = d.info || {};
+    spracheSetzen(d.sprache);
+    if (d.thema !== document.documentElement.dataset.thema) themaSetzen(d.thema);
+    const laeuft = d.zustand === "bereit";
+    $("punkt").className = "punkt" + (laeuft ? " an" : "");
+    $("status").textContent = laeuft ? (i.acc ? "Live" : T("Warte auf ACC", "Waiting for ACC")) : T("Ingenieur nicht gestartet", "Engineer not started");
+    $("session").textContent = i.acc ? `${i.session} · ${i.strecke}` : "";
+    if (laeuft && i.acc) {
+      $("platz").textContent = i.platz ? "P" + i.platz : "–";
+      $("gesamt").textContent = i.gesamt ? "/ " + i.gesamt : "";
+      for (const [s, w, n] of [["vorne", "vw", "vn"], ["hinten", "hw", "hn"]]) {
+        const x = i[s]; $(w).textContent = x ? x[2] : (s === "vorne" && i.platz === 1 ? T("Führung", "Leading") : ""); $(n).textContent = x ? `P${x[0]} ${x[1]}` : "";
+      }
+      $("runde").textContent = i.runde + (i.runden_gesamt ? T(" von ", " of ") + i.runden_gesamt : "");
+      $("letzte").textContent = i.letzte || "–"; $("beste").textContent = i.beste || "–";
+      $("tank").textContent = komma(i.tank) + " L"; $("tank-d").textContent = i.reicht ? T(`reicht ${komma(i.reicht)} Runden`, `lasts ${komma(i.reicht)} laps`) : "";
+      const knapp = (i.reicht ?? 99) < 2;
+      $("tank").className = "w" + (knapp ? " rot" : "");
+      $("balken").className = "balken" + (knapp ? " knapp" : "");
+      $("balken").firstElementChild.style.width = i.tank_max ? `${Math.min(100, (i.tank / i.tank_max) * 100)}%` : "0%";
+      $("box").textContent = i.box || "–"; $("box-d").textContent = i.box_detail || "";
+      $("rest").textContent = i.rest || "–"; $("rest-d").textContent = i.rest_runden && !i.runden_gesamt ? T(`etwa ${Math.round(i.rest_runden)} Runden`, `about ${Math.round(i.rest_runden)} laps`) : "";
+    }
+    karte(d.feld || {}, d.spiegeln);
+    rangliste(d.feld || {});
+    const funk = d.funk || [];
+    // wie in der App: der neueste Funkspruch steht unten
+    $("funk").innerHTML = funk.length ? funk.map(([art, text]) => `<div class="blase ${art === "du" ? "du" : "ing"}">${esc(text)}</div>`).join("") : `<div class="leer">${T("Noch kein Funk.", "No radio yet.")}</div>`;
+  } catch (fehler) {
+    $("punkt").className = "punkt"; $("status").textContent = T("Keine Verbindung zum PC", "No connection to the PC");
+  }
+}
+holen(); setInterval(holen, 500);
+</script>
+</body>
+</html>
